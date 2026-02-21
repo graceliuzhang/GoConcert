@@ -1,25 +1,66 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { login, register, getMe, setToken } from './api.js';
 
-export default function LoginPage({ goTo }) {
+export default function LoginPage({ onAuthSuccess }) {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [mode, setMode] = useState('login');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  const handleSubmit = async () => {
+    setLoading(true);
+    setError('');
+
+    try {
+      const response = mode === 'login'
+        ? await login(email, password)
+        : await register(email, password);
+
+      if (!response.ok) {
+        const payload = await response.json().catch(() => ({}));
+        throw new Error(payload.detail || 'Authentication failed');
+      }
+
+      const authPayload = await response.json();
+      setToken(authPayload.access_token);
+
+      const meResponse = await getMe();
+      if (!meResponse.ok) {
+        throw new Error('Could not load user profile');
+      }
+
+      const me = await meResponse.json();
+      onAuthSuccess(authPayload.access_token, me);
+    } catch (err) {
+      setError(err.message || 'Unable to sign in');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="page login-page">
       <div className="login-wrap">
         <div className="login-logo">GoConcert</div>
         <div className="login-tagline">Find Your Concert Crew</div>
         <div className="field">
-          <label>Username</label>
-          <input type="text" placeholder="@username" />
+          <label>Email</label>
+          <input type="text" placeholder="you@example.com" value={email} onChange={(e) => setEmail(e.target.value)} />
         </div>
         <div className="field">
           <label>Password</label>
-          <input type="password" placeholder="••••••••" />
+          <input type="password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} />
         </div>
-        <button className="btn btn-primary" onClick={() => goTo('home')}>
-          Sign In
+        {error && <div className="section-sub" style={{ marginBottom: 12 }}>{error}</div>}
+        <button className="btn btn-primary" onClick={handleSubmit} disabled={loading || !email || !password}>
+          {loading ? 'Please wait…' : mode === 'login' ? 'Sign In' : 'Create Account'}
         </button>
         <div className="login-footer">
-          Don&apos;t have an account?{' '}
-          <a onClick={() => goTo('home')}>Sign up free</a>
+          {mode === 'login' ? "Don't have an account? " : 'Already have an account? '}
+          <a onClick={() => setMode(mode === 'login' ? 'register' : 'login')}>
+            {mode === 'login' ? 'Sign up free' : 'Sign in'}
+          </a>
         </div>
       </div>
     </div>

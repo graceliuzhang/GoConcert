@@ -1,93 +1,87 @@
 // GroupsPage.jsx
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Nav from './Nav.jsx';
-import { GROUPS } from './data.js';
+import { authRequest } from './api.js';
 
-function GroupDetail({ group, goToUserProfile }) {
-  return (
-    <div className="card">
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 20, flexWrap: 'wrap', gap: 12 }}>
-        <div>
-          <div style={{ fontSize: '1.5rem', marginBottom: 4 }}>{group.emoji} {group.name}</div>
-          <div style={{ color: 'var(--muted)', fontSize: '.88rem' }}>
-            {group.event} · {group.venue} · {group.date}
-          </div>
-        </div>
-      </div>
+export default function GroupsPage({ goTo }) {
+  const [savedEvents, setSavedEvents] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
-      <p style={{ color: 'var(--muted)', fontSize: '.9rem', marginBottom: 24, lineHeight: 1.6 }}>
-        {group.desc}
-      </p>
+  const loadSavedEvents = async () => {
+    setLoading(true);
+    setError('');
 
-      <h4 style={{ fontFamily: "'Playfair Display', serif", marginBottom: 16 }}>
-        Members ({group.members.length})
-      </h4>
+    try {
+      const response = await authRequest('/api/events/saved');
+      if (!response.ok) {
+        throw new Error('Could not load your saved events');
+      }
 
-      {group.members.map((m, i) => (
-        <div
-          className="member-row"
-          key={i}
-          style={{ cursor: 'pointer' }}
-          onClick={goToUserProfile}
-        >
-          <div className="member-avi" style={{ fontSize: '1.1rem' }}>{m.avi}</div>
-          <div style={{ flex: 1 }}>
-            <div style={{ fontWeight: 500, fontSize: '.9rem' }}>{m.name}</div>
-            <div style={{ color: 'var(--muted)', fontSize: '.78rem' }}>{m.handle}</div>
-          </div>
-          <button className="btn btn-ghost btn-sm" style={{ fontSize: '.75rem' }}>View</button>
-        </div>
-      ))}
+      const payload = await response.json();
+      setSavedEvents(payload.events || []);
+    } catch {
+      setError('Unable to load your saved events right now.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
-      <div style={{ marginTop: 24, paddingTop: 20, borderTop: '1px solid var(--border)', display: 'flex', gap: 10 }}>
-        <button
-          className="btn btn-ghost btn-sm"
-          style={{ color: '#f87171', borderColor: '#7f2f2f' }}
-        >
-          Leave Group
-        </button>
-      </div>
-    </div>
-  );
-}
+  useEffect(() => {
+    loadSavedEvents();
+  }, []);
 
-export default function GroupsPage({ goTo, onOpenCreateGroup }) {
-  const [selectedIdx, setSelectedIdx] = useState(0);
+  const handleRemove = async (ticketmasterId) => {
+    try {
+      const response = await authRequest(`/api/events/saved/${ticketmasterId}`, 'DELETE');
+      if (!response.ok) {
+        throw new Error();
+      }
+      setSavedEvents((prev) => prev.filter((item) => item.ticketmaster_id !== ticketmasterId));
+    } catch {
+      setError('Could not remove saved event.');
+    }
+  };
 
   return (
     <div className="page">
       <Nav currentPage="groups" goTo={goTo} />
       <div className="container">
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 32, flexWrap: 'wrap', gap: 12 }}>
-          <div>
-            <div className="section-title">Your Groups</div>
-            <div className="section-sub" style={{ margin: 0 }}>Manage your concert crews</div>
-          </div>
-        </div>
+        <div className="section-title">Your Saved Events</div>
+        <div className="section-sub">This list is specific to your account</div>
 
-        <div className="groups-layout">
-          {/* Sidebar */}
-          <div className="card" style={{ padding: 12, alignSelf: 'start' }}>
-            {GROUPS.map((g, i) => (
-              <div
-                key={i}
-                className={`group-list-item${selectedIdx === i ? ' selected' : ''}`}
-                onClick={() => setSelectedIdx(i)}
-              >
-                <div className="group-avatar" style={g.avatarStyle}>{g.emoji}</div>
-                <div>
-                  <div className="group-info-name">{g.name}</div>
-                  <div className="group-info-sub">{g.date} · {g.venue}</div>
+        {loading && <div className="section-sub">Loading your data…</div>}
+        {error && <div className="section-sub">{error}</div>}
+
+        {!loading && !savedEvents.length && !error && (
+          <div className="card">
+            <div style={{ color: 'var(--muted)' }}>You have no saved events yet. Open Events and save one.</div>
+          </div>
+        )}
+
+        <div className="event-list-view">
+          {savedEvents.map((entry, index) => {
+            const ev = entry.event_data || {};
+            const key = entry._id || `${entry.ticketmaster_id}-${index}`;
+            return (
+              <div key={key} className="event-row">
+                <div className="event-row-emoji">🎫</div>
+                <div className="event-row-info">
+                  <div className="event-row-title">{ev.title || 'Untitled Event'}</div>
+                  <div className="event-row-meta">{ev.venue || 'Venue TBA'} · {ev.meta || ''}</div>
+                </div>
+                <div className="event-row-right">
+                  <button
+                    className="btn btn-ghost btn-sm"
+                    style={{ color: '#f87171', borderColor: '#7f2f2f' }}
+                    onClick={() => handleRemove(entry.ticketmaster_id)}
+                  >
+                    Remove
+                  </button>
                 </div>
               </div>
-            ))}
-          </div>
-
-          {/* Detail panel */}
-          <GroupDetail
-            group={GROUPS[selectedIdx]}
-            goToUserProfile={() => goTo('user-profile')}
-          />
+            );
+          })}
         </div>
       </div>
     </div>

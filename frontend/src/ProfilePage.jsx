@@ -2,7 +2,9 @@
 import React from 'react';
 import Nav from './Nav.jsx';
 
-export default function ProfilePage({ goTo }) {
+export default function ProfilePage({ goTo, currentUser, onSignOut }) {
+  const email = currentUser?.email || 'unknown@user.com';
+
   return (
     <div className="page">
       <Nav currentPage="profile" goTo={goTo} />
@@ -13,8 +15,8 @@ export default function ProfilePage({ goTo }) {
         <div className="profile-header">
           <div className="profile-avi-lg">🎵</div>
           <div>
-            <div className="profile-name">Jamie Chen</div>
-            <div className="profile-handle">@jamiec · Member since 2024</div>
+            <div className="profile-name">{email.split('@')[0]}</div>
+            <div className="profile-handle">{email}</div>
           </div>
         </div>
 
@@ -23,15 +25,15 @@ export default function ProfilePage({ goTo }) {
             <h3 style={{ fontFamily: "'Playfair Display', serif", marginBottom: 20 }}>Account Info</h3>
             <div className="field">
               <label>Display Name</label>
-              <input defaultValue="Jamie Chen" />
+              <input defaultValue={email.split('@')[0]} />
             </div>
             <div className="field">
-              <label>Username</label>
-              <input defaultValue="@jamiec" />
+              <label>Email</label>
+              <input defaultValue={email} />
             </div>
             <div className="field">
-              <label>Bio</label>
-              <textarea defaultValue="Indie music lover. Always looking for concert crew! 🎶" />
+              <label>User ID</label>
+              <input defaultValue={currentUser?.id || ''} />
             </div>
             <button className="btn btn-primary btn-sm">Save Changes</button>
           </div>
@@ -55,7 +57,7 @@ export default function ProfilePage({ goTo }) {
               <button
                 className="btn btn-ghost btn-sm"
                 style={{ color: '#f87171', borderColor: '#7f2f2f' }}
-                onClick={() => goTo('login')}
+                onClick={onSignOut}
               >
                 Sign Out
               </button>
