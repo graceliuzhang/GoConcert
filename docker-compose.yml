@@ -8,6 +8,7 @@ services:
       - "8000:8000"
     environment:
       MONGO_URL: mongodb+srv://admin:GoConcert_admin@goconcert.zbbv9s6.mongodb.net/goconcert_db?retryWrites=true&w=majority
+      TICKETMASTER_API_KEY: e6GnItapDxy0zQVPEKV0Obfr2gEtWuFm
 
   frontend:
     build: ./frontend
