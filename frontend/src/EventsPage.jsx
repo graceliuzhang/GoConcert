@@ -1,12 +1,37 @@
 // EventsPage.jsx
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Nav from './Nav.jsx';
-import { EVENTS } from './data.js';
 
 export default function EventsPage({ goTo, onSelectEvent }) {
   const [search, setSearch] = useState('');
+  const [events, setEvents] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
-  const filtered = EVENTS.filter(e =>
+  useEffect(() => {
+    const fetchEvents = async () => {
+      setLoading(true);
+      setError('');
+
+      try {
+        const response = await fetch('/api/events?city=Raleigh&size=20');
+        if (!response.ok) {
+          throw new Error('Could not fetch events');
+        }
+
+        const payload = await response.json();
+        setEvents(payload.events || []);
+      } catch {
+        setError('Unable to load events right now. Please try again.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchEvents();
+  }, []);
+
+  const filtered = events.filter(e =>
     e.title.toLowerCase().includes(search.toLowerCase())
   );
 
@@ -33,14 +58,16 @@ export default function EventsPage({ goTo, onSelectEvent }) {
         </div>
 
         <div className="event-list-view">
+          {loading && <div className="section-sub">Loading events…</div>}
+          {error && <div className="section-sub">{error}</div>}
           {filtered.map((ev, i) => (
             <div
-              key={i}
+              key={ev.id || i}
               className="event-row"
               onClick={() => onSelectEvent(ev)}
             >
-              <div className="event-row-emoji" style={ev.emojiStyle}>
-                {ev.emoji}
+              <div className="event-row-emoji" style={ev.emojiStyle || {}}>
+                {ev.emoji || '🎵'}
               </div>
               <div className="event-row-info">
                 <div className="event-row-title">{ev.title}</div>
@@ -48,7 +75,7 @@ export default function EventsPage({ goTo, onSelectEvent }) {
               </div>
               <div className="event-row-right">
                 <span className="pill" style={{ fontSize: '.75rem' }}>
-                  {ev.groups} groups
+                  {ev.groups ?? 0} groups
                 </span>
               </div>
             </div>
