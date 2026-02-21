@@ -1,9 +1,7 @@
-from asyncio import events
-
 from fastapi import APIRouter, HTTPException, Depends
 from database import db
 from dependencies.auth_dependencies import get_current_user
-from schemas.event_schema import EventCreate, EventResponse
+from schemas.event_schema import EventCreate
 import httpx
 import os
 from datetime import datetime
@@ -20,7 +18,11 @@ TICKETMASTER_API_KEY = os.getenv("TICKETMASTER_API_KEY")
 # --------------------------------------------------
 
 @router.get("/")
-async def fetch_events(city: str = "Raleigh", size: int = 20):
+async def fetch_events(
+    city: str | None = None,
+    size: int = 100,
+    keyword: str | None = None,
+):
 
     if not TICKETMASTER_API_KEY:
         raise HTTPException(status_code=500, detail="Missing TICKETMASTER_API_KEY")
@@ -29,9 +31,13 @@ async def fetch_events(city: str = "Raleigh", size: int = 20):
 
     params = {
         "apikey": TICKETMASTER_API_KEY,
-        "city": city,
-        "size": size
+        "size": min(max(size, 1), 100),
     }
+
+    if keyword:
+        params["keyword"] = keyword
+    elif city:
+        params["city"] = city
 
     async with httpx.AsyncClient() as client:
         response = await client.get(url, params=params)
@@ -131,6 +137,7 @@ async def fetch_events(city: str = "Raleigh", size: int = 20):
                 "url": event.get("url"),
                 "latitude": latitude,
                 "longitude": longitude,
+                "distance_miles": event.get("distance"),
                 "image": next(
                     (img.get("url") for img in event.get("images", []) if img.get("url")),
                     None

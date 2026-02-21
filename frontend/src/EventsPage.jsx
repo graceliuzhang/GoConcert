@@ -7,16 +7,21 @@ export default function EventsPage({ goTo, onSelectEvent }) {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [distance, setDistance] = useState('any');
-  const [userLocation, setUserLocation] = useState(null);
 
   useEffect(() => {
+    const timeoutId = setTimeout(() => {
     const fetchEvents = async () => {
       setLoading(true);
       setError('');
 
       try {
-        const response = await fetch('/api/events/?city=Raleigh&size=20');
+        const params = new URLSearchParams({ size: '100' });
+        const keyword = search.trim();
+        if (keyword) {
+          params.set('keyword', keyword);
+        }
+
+        const response = await fetch(`/api/events/?${params.toString()}`);
         if (!response.ok) {
           const text = await response.text();
           throw new Error(`Could not fetch events: ${response.status} ${text}`);
@@ -34,48 +39,10 @@ export default function EventsPage({ goTo, onSelectEvent }) {
     };
 
     fetchEvents();
-  }, []);
+    }, 300);
 
-  // request browser geolocation once on mount
-  useEffect(() => {
-    if (!navigator.geolocation) return;
-    navigator.geolocation.getCurrentPosition(
-      (pos) => setUserLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
-      (err) => {
-        // user denied or unavailable — keep userLocation null
-        console.warn('Geolocation unavailable:', err.message);
-      },
-      { enableHighAccuracy: false, timeout: 10000 }
-    );
-  }, []);
-
-  const getEventDistance = (e) => {
-    // prefer already-computed numeric distance; otherwise, compute from lat/lng when userLocation exists
-    if (typeof e.distance === 'number') return e.distance;
-    if ((e.distanceMiles ?? e.distance_miles) && !isNaN(Number(e.distanceMiles ?? e.distance_miles))) {
-      return Number(e.distanceMiles ?? e.distance_miles);
-    }
-    if (userLocation && e.latitude != null && e.longitude != null) {
-      const elat = Number(e.latitude);
-      const elng = Number(e.longitude);
-      if (!isFinite(elat) || !isFinite(elng)) return Infinity;
-      const toRad = (v) => (v * Math.PI) / 180;
-      const R = 3958.8; // miles
-      const dLat = toRad(elat - userLocation.lat);
-      const dLon = toRad(elng - userLocation.lng);
-      const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-                Math.cos(toRad(userLocation.lat)) * Math.cos(toRad(elat)) *
-                Math.sin(dLon / 2) * Math.sin(dLon / 2);
-      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-      return R * c;
-    }
-    return Infinity;
-  };
-
-  const filtered = events.filter(e =>
-    e.title.toLowerCase().includes(search.toLowerCase()) &&
-    (distance === 'any' || getEventDistance(e) <= Number(distance))
-  );
+    return () => clearTimeout(timeoutId);
+  }, [search]);
 
   return (
     <div className="page">
@@ -83,6 +50,11 @@ export default function EventsPage({ goTo, onSelectEvent }) {
       <div className="container">
         <div className="section-title">Events</div>
         <div className="section-sub">Find concerts and connect with fans going to the same show</div>
+        {!loading && !error && (
+          <div className="section-sub" style={{ marginTop: -10 }}>
+            Showing {events.length} events
+          </div>
+        )}
 
         <div className="search-bar">
           <input
@@ -91,18 +63,15 @@ export default function EventsPage({ goTo, onSelectEvent }) {
             value={search}
             onChange={e => setSearch(e.target.value)}
           />
-          <select value={distance} onChange={e => setDistance(e.target.value)}>
-            <option value="25">Within 25 mi</option>
-            <option value="50">Within 50 mi</option>
-            <option value="100">Within 100 mi</option>
-            <option value="any">Any distance</option>
-          </select>
         </div>
 
         <div className="event-list-view">
           {loading && <div className="section-sub">Loading events…</div>}
           {error && <div className="section-sub">{error}</div>}
-          {filtered.map((ev, i) => (
+          {!loading && !error && events.length === 0 && (
+            <div className="section-sub">No events found.</div>
+          )}
+          {events.map((ev, i) => (
             <div
               key={ev.ticketmaster_id || i}
               className="event-row"
