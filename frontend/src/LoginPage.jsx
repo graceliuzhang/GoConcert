@@ -8,11 +8,11 @@ export default function LoginPage({ goTo }) {
         <div className="login-tagline">Find Your Concert Crew</div>
         <div className="field">
           <label>Username</label>
-          <input type="text" placeholder="@username" />
+          <input type="text" placeholder="Enter Username" />
         </div>
         <div className="field">
           <label>Password</label>
-          <input type="password" placeholder="••••••••" />
+          <input type="password" placeholder="Enter Password" />
         </div>
         <button className="btn btn-primary" onClick={() => goTo('home')}>
           Sign In

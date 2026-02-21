@@ -40,15 +40,15 @@ export default function ProfilePage({ goTo }) {
             <h3 style={{ fontFamily: "'Playfair Display', serif", marginBottom: 20 }}>Security</h3>
             <div className="field">
               <label>Current Password</label>
-              <input type="password" placeholder="••••••••" />
+              <input type="password" placeholder="Enter Current Password" />
             </div>
             <div className="field">
               <label>New Password</label>
-              <input type="password" placeholder="••••••••" />
+              <input type="password" placeholder="Enter New Password" />
             </div>
             <div className="field">
               <label>Confirm Password</label>
-              <input type="password" placeholder="••••••••" />
+              <input type="password" placeholder="Confirm New Password" />
             </div>
             <button className="btn btn-ghost btn-sm">Change Password</button>
             <div style={{ marginTop: 32, paddingTop: 20, borderTop: '1px solid var(--border)' }}>
