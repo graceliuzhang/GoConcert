@@ -1,20 +1,45 @@
 version: "3.9"
 
+<<<<<<< HEAD
 
 services:
 
+=======
+services:
+  mongodb:
+    image: mongo:7
+    restart: always
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+>>>>>>> d7b39a9115658f819f32a3f308bebac9298c4f22
 
   backend:
     build: ./backend
     ports:
       - "8000:8000"
+<<<<<<< HEAD
     environment:
       MONGO_URL: mongodb+srv://admin:GoConcert_admin@goconcert.zbbv9s6.mongodb.net/goconcert_db?retryWrites=true&w=majority
 
+=======
+    depends_on:
+      - mongodb
+    environment:
+      MONGO_URL: mongodb://mongodb:27017/mydb
+>>>>>>> d7b39a9115658f819f32a3f308bebac9298c4f22
 
   frontend:
     build: ./frontend
     ports:
       - "3000:3000"
     depends_on:
+<<<<<<< HEAD
       - backend
+=======
+      - backend
+
+volumes:
+  mongo_data:
+>>>>>>> d7b39a9115658f819f32a3f308bebac9298c4f22
