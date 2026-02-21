@@ -3,6 +3,7 @@ from asyncio import events
 from fastapi import APIRouter, HTTPException, Depends
 from database import db
 from dependencies.auth_dependencies import get_current_user
+from schemas.event_schema import EventCreate, EventResponse
 import httpx
 import os
 from datetime import datetime
@@ -95,6 +96,17 @@ async def fetch_events(city: str = "Raleigh", size: int = 20):
             .get("venues", [{}])[0]
         )
 
+        # Extract latitude and longitude
+        location_info = venue_info.get("location", {})
+        latitude = location_info.get("latitude")
+        longitude = location_info.get("longitude")
+        try:
+            latitude = float(latitude) if latitude else None
+            longitude = float(longitude) if longitude else None
+        except ValueError:
+            latitude = None
+            longitude = None
+
         date_info = event.get("dates", {}).get("start", {}).get("localDate", "TBD")
         time_info = event.get("dates", {}).get("start", {}).get("localTime", "")
         city_name = venue_info.get("city", {}).get("name", "")
@@ -107,8 +119,8 @@ async def fetch_events(city: str = "Raleigh", size: int = 20):
         if time_info:
             meta_parts.append(time_info)
         if city_name:
-            location = city_name if not state_name else f"{city_name}, {state_name}"
-            meta_parts.append(location)
+            location_display = city_name if not state_name else f"{city_name}, {state_name}"
+            meta_parts.append(location_display)
 
         normalized_events.append(
             {
@@ -117,6 +129,8 @@ async def fetch_events(city: str = "Raleigh", size: int = 20):
                 "venue": venue_info.get("name", "Venue TBA"),
                 "meta": " · ".join(meta_parts),
                 "url": event.get("url"),
+                "latitude": latitude,
+                "longitude": longitude,
                 "image": next(
                     (img.get("url") for img in event.get("images", []) if img.get("url")),
                     None
@@ -142,14 +156,16 @@ async def fetch_events(city: str = "Raleigh", size: int = 20):
 
 @router.post("/save")
 async def save_event(
-    event: dict,
+    event: EventCreate,
     current_user=Depends(get_current_user)
 ):
     try:
         await db.saved_events.insert_one({
             "user_id": current_user["_id"],
-            "ticketmaster_id": event.get("ticketmaster_id"),
-            "event_data": event,
+            "ticketmaster_id": event.ticketmaster_id,
+            "latitude": event.latitude,
+            "longitude": event.longitude,
+            "event_data": event.dict(),
             "saved_at": datetime.utcnow()
         })
     except Exception:
@@ -157,14 +173,16 @@ async def save_event(
         existing = fallback_saved_events.get(user_key, [])
         existing = [
             item for item in existing
-            if item.get("ticketmaster_id") != event.get("ticketmaster_id")
+            if item.get("ticketmaster_id") != event.ticketmaster_id
         ]
         existing.append(
             {
                 "_id": create_access_token({"sub": user_key}),
                 "user_id": user_key,
-                "ticketmaster_id": event.get("ticketmaster_id"),
-                "event_data": event,
+                "ticketmaster_id": event.ticketmaster_id,
+                "latitude": event.latitude,
+                "longitude": event.longitude,
+                "event_data": event.dict(),
                 "saved_at": datetime.utcnow().isoformat(),
             }
         )
