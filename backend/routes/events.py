@@ -1,3 +1,5 @@
+from asyncio import events
+
 from fastapi import APIRouter, HTTPException, Depends
 from database import db
 from dependencies.auth_dependencies import get_current_user
@@ -46,17 +48,42 @@ async def fetch_events(city: str = "Raleigh", size: int = 20):
     if events:
         try:
             for event in events:
+
+                venue_info = (
+                    event.get("_embedded", {})
+                    .get("venues", [{}])[0]
+                )
+
+                location_info = venue_info.get("location", {})
+
+                latitude = location_info.get("latitude")
+                longitude = location_info.get("longitude")
+
+                try:
+                    latitude = float(latitude) if latitude else None
+                    longitude = float(longitude) if longitude else None
+                except ValueError:
+                    latitude = None
+                    longitude = None
+
                 await db.events.update_one(
                     {"ticketmaster_id": event.get("id")},
                     {
                         "$set": {
                             "ticketmaster_id": event.get("id"),
                             "raw": event,
-                            "cached_at": datetime.utcnow()
+                            "cached_at": datetime.utcnow(),
+                            "latitude": latitude,
+                            "longitude": longitude,
+                            "location": {
+                                "type": "Point",
+                                "coordinates": [longitude, latitude]
+                            } if latitude and longitude else None
                         }
                     },
                     upsert=True
                 )
+
         except Exception as exc:
             print(f"Mongo cache write skipped: {exc}")
 
