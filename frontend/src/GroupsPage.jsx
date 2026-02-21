@@ -13,7 +13,6 @@ function GroupDetail({ group, goToUserProfile }) {
             {group.event} · {group.venue} · {group.date}
           </div>
         </div>
-        <button className="btn btn-ghost btn-sm">Edit</button>
       </div>
 
       <p style={{ color: 'var(--muted)', fontSize: '.9rem', marginBottom: 24, lineHeight: 1.6 }}>
@@ -82,15 +81,6 @@ export default function GroupsPage({ goTo, onOpenCreateGroup }) {
                 </div>
               </div>
             ))}
-            <div style={{ marginTop: 10, paddingTop: 10, borderTop: '1px solid var(--border)' }}>
-              <button
-                className="btn btn-primary"
-                style={{ width: '100%', justifyContent: 'center', borderRadius: 10, padding: '10px 16px', fontSize: '.88rem' }}
-                onClick={onOpenCreateGroup}
-              >
-                + Create Group
-              </button>
-            </div>
           </div>
 
           {/* Detail panel */}
