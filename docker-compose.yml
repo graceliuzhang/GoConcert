@@ -1,0 +1,20 @@
+version: "3.9"
+
+
+services:
+
+
+  backend:
+    build: ./backend
+    ports:
+      - "8000:8000"
+    environment:
+      MONGO_URL: mongodb+srv://admin:GoConcert_admin@goconcert.zbbv9s6.mongodb.net/goconcert_db?retryWrites=true&w=majority
+
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
