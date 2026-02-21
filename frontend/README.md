@@ -1,16 +1,39 @@
 # React + Vite
+# GoConcert – React App
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## File Structure
 
-Currently, two official plugins are available:
+```
+goconcert/
+├── main.jsx              # Entry point (React 18 / Vite)
+├── App.jsx               # Root: manages page routing state & modal
+├── styles.css            # All CSS (converted from inline <style>)
+├── data.js               # Static mock data (events, groups)
+│
+├── Nav.jsx               # Shared sticky navigation bar
+├── CreateGroupModal.jsx  # Shared modal for creating a group
+│
+├── LoginPage.jsx         # /login
+├── HomePage.jsx          # /home – hero section
+├── EventsPage.jsx        # /events – searchable event list
+├── EventDetailPage.jsx   # /event-detail – groups at a show
+├── GroupsPage.jsx        # /groups – sidebar + group detail panel
+├── UserProfilePage.jsx   # /user-profile – member card view
+└── ProfilePage.jsx       # /profile – account settings
+```
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Getting Started (Vite)
 
-## React Compiler
+```bash
+npm create vite@latest goconcert -- --template react
+cd goconcert
+# Replace src/ contents with these files
+npm install
+npm run dev
+```
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Notes
 
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+- Routing is handled via simple `useState` in `App.jsx` (no React Router dependency).
+- `data.js` holds all mock data. Swap with real API calls as needed.
+- CSS custom properties (design tokens) are defined at `:root` in `styles.css`.
