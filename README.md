@@ -24,6 +24,7 @@ The GoConcert website is designed for concert enthusiasts who want to meet other
 - FastAPI
 - Ticket Master Discovery API
 - MongoDB Atlas
+- Railway for Deployment
 
 
 ## Demo
