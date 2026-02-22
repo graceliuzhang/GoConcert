@@ -5,9 +5,9 @@
   --surface: #ffffff;
   --surface2: #ede5ff;
   --border: #d4c0f5;
-  --accent: #7c3aed;
+  --accent: #E1BAF7;
   --accent2: #B36EDB;
-  --accent3: #c026d3;
+  --accent3: #E1BAF7;
   --text: #1e1240;
   --muted: #7a6a9e;
   --input-bg: #f8f4ff;
@@ -412,7 +412,9 @@ nav {
   height: 220px;
   border-radius: 16px;
   margin-bottom: 32px;
-  background: linear-gradient(135deg, var(--surface2) 0%, #3d1060 100%);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  box-shadow: var(--glow);
   display: flex;
   align-items: flex-end;
   padding: 28px;
