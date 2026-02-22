@@ -59,7 +59,7 @@ export default function EventsPage({ goTo, onSelectEvent }) {
         <div className="search-bar">
           <input
             type="text"
-            placeholder="🔍  Search artist or tour name…"
+            placeholder="Search artist or tour name"
             value={search}
             onChange={e => setSearch(e.target.value)}
           />

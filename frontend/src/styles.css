@@ -1,4 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css?family=Inria Serif');
+@import url('https://fonts.googleapis.com/css?family=Lato');
 
 :root {
   --bg: #f3eeff;
@@ -17,7 +19,7 @@
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
-  font-family: 'DM Sans', sans-serif;
+  font-family: 'Inria Serif';
   background-color: var(--bg);
   background-image: url('/background.png');
   background-size: cover;
@@ -85,7 +87,7 @@ nav {
   background: none;
   border: none;
   color: var(--muted);
-  font-family: 'DM Sans', sans-serif;
+  font-family: 'Lato';
   font-size: .9rem;
   padding: 8px 18px;
   border-radius: 999px;
@@ -142,7 +144,7 @@ nav {
   gap: 8px;
   padding: 12px 28px;
   border-radius: 999px;
-  font-family: 'DM Sans', sans-serif;
+  font-family: 'Lato';
   font-size: .9rem;
   font-weight: 500;
   cursor: pointer;
@@ -387,7 +389,7 @@ nav {
   border: 1px solid var(--border);
   border-radius: 999px;
   color: var(--text);
-  font-family: 'DM Sans', sans-serif;
+  font-family: 'Lato';
   font-size: .95rem;
   outline: none;
   transition: border-color .2s;
