@@ -96,8 +96,6 @@ export default function EventDetailPage({ goTo, event, onOpenCreateGroup }) {
           <button className="btn btn-primary" onClick={onOpenCreateGroup}>
             + Create Group
           </button>
-          <button className="btn btn-ghost" onClick={handleSaveEvent}>Save Event</button>
-          {saveState && <div className="section-sub" style={{ margin: 0 }}>{saveState}</div>}
         </div>
 
         <div>
