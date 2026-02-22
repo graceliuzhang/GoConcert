@@ -17,15 +17,7 @@ export default function EventDetailPage({ goTo, event, onOpenCreateGroup, refres
   }, [event?.ticketmaster_id, refreshKey]);
 
   // Auto-refresh groups every 10 seconds when on this page
-  useEffect(() => {
-    if (!event?.ticketmaster_id) return;
-
-    const interval = setInterval(() => {
-      loadGroups(true);
-    }, 10000); // Refresh every 10 seconds
-
-    return () => clearInterval(interval);
-  }, [event?.ticketmaster_id]);
+  // Auto-refresh removed: groups will only load on mount or manual refresh
 
   const loadGroups = async (forceRefresh = false) => {
     // Prevent duplicate fetches within 1 second
