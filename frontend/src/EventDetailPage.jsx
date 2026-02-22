@@ -4,7 +4,6 @@ import Nav from './Nav.jsx';
 import { authRequest } from './api.js';
 
 export default function EventDetailPage({ goTo, event, onOpenCreateGroup, refreshKey }) {
-  const [saveState, setSaveState] = useState('');
   const [groups, setGroups] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -66,29 +65,7 @@ export default function EventDetailPage({ goTo, event, onOpenCreateGroup, refres
 
   if (!event) return null;
 
-  const handleSaveEvent = async () => {
-    setSaveState('Saving...');
-    try {
-      const response = await authRequest('/api/events/save', 'POST', {
-        ticketmaster_id: event.ticketmaster_id || event.id,
-        title: event.title,
-        venue: event.venue,
-        meta: event.meta,
-        url: event.url,
-        image: event.image,
-        latitude: event.latitude,
-        longitude: event.longitude,
-      });
-
-      if (!response.ok) {
-        throw new Error();
-      }
-
-      setSaveState('Saved to your account');
-    } catch {
-      setSaveState('Unable to save event');
-    }
-  };
+  
 
   const handleJoinGroup = async (groupId) => {
     try {
@@ -131,10 +108,6 @@ export default function EventDetailPage({ goTo, event, onOpenCreateGroup, refres
           <button className="btn btn-primary" onClick={onOpenCreateGroup}>
             + Create Group
           </button>
-          <button className="btn btn-ghost" onClick={handleSaveEvent}>
-            Save Event
-          </button>
-          {saveState && <div className="section-sub" style={{ margin: 0 }}>{saveState}</div>}
         </div>
 
         <div>
