@@ -134,9 +134,6 @@ export default function EventDetailPage({ goTo, event, onOpenCreateGroup, refres
           <button className="btn btn-ghost" onClick={handleSaveEvent}>
             Save Event
           </button>
-          <button className="btn btn-ghost" onClick={handleRefresh} disabled={refreshing}>
-            {refreshing ? '🔄 Refreshing...' : '🔄 Refresh Groups'}
-          </button>
           {saveState && <div className="section-sub" style={{ margin: 0 }}>{saveState}</div>}
         </div>
 
