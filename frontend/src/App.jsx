@@ -9,7 +9,7 @@ import EventDetailPage from './EventDetailPage.jsx';
 import GroupsPage from './GroupsPage.jsx';
 import UserProfilePage from './UserProfilePage.jsx';
 import ProfilePage from './ProfilePage.jsx';
-import CreateGroupModal from './CreateGroupModal.jsx';
+import CreateGroupModal from './Creategroupmodal.jsx';
 import { clearToken, getMe, getToken, setToken } from './api.js';
 
 export default function App() {
@@ -65,9 +65,13 @@ export default function App() {
     goTo('event-detail');
   };
 
-  const handleCreateGroupConfirm = () => {
+  const handleCreateGroupConfirm = async () => {
     setModalOpen(false);
-    goTo('groups');
+    // Refresh the event detail page to show new group
+    if (page === 'event-detail' && selectedEvent) {
+      // Force re-render by updating selectedEvent
+      setSelectedEvent({...selectedEvent});
+    }
   };
 
   const handleAuthSuccess = (token, user) => {
@@ -119,6 +123,7 @@ export default function App() {
       {authToken && (
         <CreateGroupModal
           isOpen={modalOpen}
+          event={selectedEvent}
           onClose={() => setModalOpen(false)}
           onConfirm={handleCreateGroupConfirm}
         />

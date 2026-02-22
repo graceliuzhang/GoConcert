@@ -1,16 +1,33 @@
 // EventDetailPage.jsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Nav from './Nav.jsx';
 import { authRequest } from './api.js';
 
-const STATIC_GROUPS = [
-  { name: 'Front Row Squad', count: '4/6', status: 'Open', full: false },
-  { name: 'Section GA Crew', count: '2/8', status: 'Open', full: false },
-  { name: 'Pre-show Drinks Gang', count: '5/5', status: 'Full', full: true },
-];
-
 export default function EventDetailPage({ goTo, event, onOpenCreateGroup }) {
   const [saveState, setSaveState] = useState('');
+  const [groups, setGroups] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (event?.ticketmaster_id) {
+      loadGroups();
+    }
+  }, [event?.ticketmaster_id]);
+
+  const loadGroups = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch(`/api/groups/event/${event.ticketmaster_id}`);
+      if (response.ok) {
+        const data = await response.json();
+        setGroups(data.groups || []);
+      }
+    } catch (err) {
+      console.error('Failed to load groups:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   if (!event) return null;
 
@@ -24,6 +41,8 @@ export default function EventDetailPage({ goTo, event, onOpenCreateGroup }) {
         meta: event.meta,
         url: event.url,
         image: event.image,
+        latitude: event.latitude,
+        longitude: event.longitude,
       });
 
       if (!response.ok) {
@@ -33,6 +52,21 @@ export default function EventDetailPage({ goTo, event, onOpenCreateGroup }) {
       setSaveState('Saved to your account');
     } catch {
       setSaveState('Unable to save event');
+    }
+  };
+
+  const handleJoinGroup = async (groupId) => {
+    try {
+      const response = await authRequest(`/api/groups/${groupId}/join`, 'POST');
+      if (response.ok) {
+        await loadGroups(); // Reload groups to update counts
+        alert('Successfully joined group!');
+      } else {
+        const data = await response.json();
+        alert(data.detail || 'Failed to join group');
+      }
+    } catch (err) {
+      alert('Failed to join group');
     }
   };
 
@@ -70,20 +104,30 @@ export default function EventDetailPage({ goTo, event, onOpenCreateGroup }) {
           <h3 style={{ marginBottom: 16, fontFamily: "'Playfair Display', serif" }}>
             Groups at this Show
           </h3>
-          {STATIC_GROUPS.map((g, i) => (
-            <div className="group-row" key={i}>
+          {loading && <div className="section-sub">Loading groups...</div>}
+          {!loading && groups.length === 0 && (
+            <div className="card">
+              <div style={{ color: 'var(--muted)' }}>
+                No groups yet. Be the first to create one!
+              </div>
+            </div>
+          )}
+          {groups.map((g) => (
+            <div className="group-row" key={g.id}>
               <div>
                 <div style={{ fontWeight: 500 }}>{g.name}</div>
                 <div style={{ color: 'var(--muted)', fontSize: '.82rem' }}>
-                  {g.count} members · {g.status}
+                  {g.current_members}/{g.max_members} members · {g.is_full ? 'Full' : 'Open'}
+                  {g.description && ` · ${g.description}`}
                 </div>
               </div>
               <button
                 className="btn btn-ghost btn-sm"
-                disabled={g.full}
-                style={g.full ? { opacity: .4 } : {}}
+                disabled={g.is_full}
+                style={g.is_full ? { opacity: .4 } : {}}
+                onClick={() => handleJoinGroup(g.id)}
               >
-                {g.full ? 'Full' : 'Join'}
+                {g.is_full ? 'Full' : 'Join'}
               </button>
             </div>
           ))}
