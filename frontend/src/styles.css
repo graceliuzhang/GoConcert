@@ -170,7 +170,7 @@ nav {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 16px;
-  padding: 24px;
+  padding: 23px;
   transition: all .25s;
 }
 

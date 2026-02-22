@@ -22,7 +22,7 @@ export default function Nav({ currentPage, goTo }) {
           </button>
         ))}
       </div>
-      <div className="nav-avatar" onClick={() => goTo('profile')}>🎵</div>
+      <div className="nav-avatar" onClick={() => goTo('profile')}>👤</div>
     </nav>
   );
 }
