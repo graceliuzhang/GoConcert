@@ -1,47 +1,68 @@
-// ProfilePage.jsx
-import React from 'react';
-import Nav from './Nav.jsx';
+import React, { useState } from 'react';
+import { login, register, getMe, setToken } from './api.js';
 
+export default function LoginPage({ onAuthSuccess }) {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [mode, setMode] = useState('login');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
-export default function ProfilePage({ goTo, currentUser, onSignOut }) {
- const email = currentUser?.email || 'unknown@user.com';
+  const handleSubmit = async () => {
+    setLoading(true);
+    setError('');
 
+    try {
+      const response = mode === 'login'
+        ? await login(email, password)
+        : await register(email, password);
 
- return (
-   <div className="page">
-     <Nav currentPage="profile" goTo={goTo} />
-     <div className="container">
-       <div className="section-title">Profile</div>
-       <div className="section-sub" style={{ marginBottom: 32 }}>Manage your account</div>
+      if (!response.ok) {
+        const payload = await response.json().catch(() => ({}));
+        throw new Error(payload.detail || 'Authentication failed');
+      }
 
+      const authPayload = await response.json();
+      setToken(authPayload.access_token);
 
-       <div className="profile-grid">
-         <div className="card" style={{ flex: 1, width: '100%' }}>
-           <h3 style={{ fontFamily: "'Playfair Display', serif", marginBottom: 20 }}>Account Info</h3>
-           <div className="field">
-             <label>Display Name</label>
-             <div>{email.split('@')[0]}</div>
-           </div>
-           <div className="field">
-             <label>Email</label>
-             <div>{email}</div>
-           </div>
-           <div className="field">
-             <label>Bio</label>
-             <textarea placeholder="Tell us about yourself..." style={{ minHeight: 100, fontFamily: "'DM Sans', sans-serif", padding: 8, border: '1px solid var(--border)', borderRadius: 8, backgroundColor: 'var(--input-bg)' }} />
-           </div>
-           <div style={{ marginTop: 32, paddingTop: 20, borderTop: '1px solid var(--border)' }}>
-             <button
-               className="btn btn-ghost btn-sm"
-               style={{ color: '#f87171', borderColor: '#7f2f2f' }}
-               onClick={onSignOut}
-             >
-               Sign Out
-             </button>
-           </div>
-         </div>
-       </div>
-     </div>
-   </div>
- );
+      const meResponse = await getMe();
+      if (!meResponse.ok) {
+        throw new Error('Could not load user profile');
+      }
+
+      const me = await meResponse.json();
+      onAuthSuccess(authPayload.access_token, me);
+    } catch (err) {
+      setError(err.message || 'Unable to sign in');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="page login-page">
+      <div className="login-wrap">
+        <div className="login-logo">GoConcert</div>
+        <div className="login-tagline">Find Your Concert Crew</div>
+        <div className="field">
+          <label>Email</label>
+          <input type="text" placeholder="you@example.com" value={email} onChange={(e) => setEmail(e.target.value)} />
+        </div>
+        <div className="field">
+          <label>Password</label>
+          <input type="password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} />
+        </div>
+        {error && <div className="section-sub" style={{ marginBottom: 12 }}>{error}</div>}
+        <button className="btn btn-primary" onClick={handleSubmit} disabled={loading || !email || !password}>
+          {loading ? 'Please wait…' : mode === 'login' ? 'Sign In' : 'Create Account'}
+        </button>
+        <div className="login-footer">
+          {mode === 'login' ? "Don't have an account? " : 'Already have an account? '}
+          <a onClick={() => setMode(mode === 'login' ? 'register' : 'login')}>
+            {mode === 'login' ? 'Sign up free' : 'Sign in'}
+          </a>
+        </div>
+      </div>
+    </div>
+  );
 }
