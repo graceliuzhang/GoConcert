@@ -1,7 +1,7 @@
 // EventDetailPage.jsx
 import React, { useState, useEffect, useRef } from 'react';
 import Nav from './Nav.jsx';
-import { authRequest } from './api.js';
+import { authRequest, buildApiUrl } from './api.js';
 
 export default function EventDetailPage({ goTo, event, onOpenCreateGroup, refreshKey }) {
   const [groups, setGroups] = useState([]);
@@ -31,7 +31,7 @@ export default function EventDetailPage({ goTo, event, onOpenCreateGroup, refres
     try {
       // Add cache-busting parameter to force fresh data
       const timestamp = new Date().getTime();
-      const response = await fetch(`/api/groups/event/${event.ticketmaster_id}?_t=${timestamp}`, {
+      const response = await fetch(buildApiUrl(`/api/groups/event/${event.ticketmaster_id}?_t=${timestamp}`), {
         cache: 'no-cache',
         headers: {
           'Cache-Control': 'no-cache'
