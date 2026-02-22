@@ -79,6 +79,15 @@ nav {
   font-size: 1.5rem;
   color: var(--text);
   letter-spacing: .02em;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.nav-logo-icon {
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
 }
 
 .nav-links { display: flex; gap: 8px; }
@@ -359,6 +368,12 @@ nav {
   align-items: center;
   justify-content: center;
   font-size: 1.5rem;
+}
+
+.event-row-emoji-icon {
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
 }
 
 .event-row-info { flex: 1; min-width: 0; }
