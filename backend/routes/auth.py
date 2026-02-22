@@ -22,7 +22,6 @@ async def register(user: RegisterModel):
 
         result = await db.users.insert_one({
             "email": user.email,
-            "display_name": user.display_name,
             "hashed_password": hashed
         })
 
@@ -47,7 +46,6 @@ async def register(user: RegisterModel):
         fallback_user = {
             "_id": user_id,
             "email": user.email,
-            "display_name": user.display_name,
             "hashed_password": hashed,
         }
         fallback_users_by_email[user.email] = fallback_user

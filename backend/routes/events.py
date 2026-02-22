@@ -102,6 +102,14 @@ async def fetch_events(
             .get("venues", [{}])[0]
         )
 
+        group_count = 0
+        try:
+            group_count = await db.groups.count_documents({
+                "event_id": event.get("id")
+            })
+        except Exception as exc:
+            print(f"Group count lookup skipped: {exc}")
+
         # Extract latitude and longitude
         location_info = venue_info.get("location", {})
         latitude = location_info.get("latitude")
@@ -137,6 +145,7 @@ async def fetch_events(
                 "url": event.get("url"),
                 "latitude": latitude,
                 "longitude": longitude,
+                "groups": group_count,
                 "distance_miles": event.get("distance"),
                 "image": next(
                     (img.get("url") for img in event.get("images", []) if img.get("url")),

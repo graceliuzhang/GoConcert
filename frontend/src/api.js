@@ -35,11 +35,11 @@ export async function login(email, password) {
   return response;
 }
 
-export async function register(email, password, displayName) {
+export async function register(email, password) {
   const response = await fetch('/api/auth/register', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email, password, display_name: displayName }),
+    body: JSON.stringify({ email, password }),
   });
   return response;
 }
