@@ -1,6 +1,7 @@
 // EventsPage.jsx
 import React, { useEffect, useState } from 'react';
 import Nav from './Nav.jsx';
+import { buildApiUrl } from './api.js';
 
 export default function EventsPage({ goTo, onSelectEvent }) {
   const [search, setSearch] = useState('');
@@ -21,7 +22,7 @@ export default function EventsPage({ goTo, onSelectEvent }) {
           params.set('keyword', keyword);
         }
 
-        const response = await fetch(`/api/events/?${params.toString()}`);
+        const response = await fetch(buildApiUrl(`/api/events/?${params.toString()}`));
         if (!response.ok) {
           const text = await response.text();
           throw new Error(`Could not fetch events: ${response.status} ${text}`);

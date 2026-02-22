@@ -9,6 +9,16 @@ app.include_router(events.router, prefix="/events", tags=["events"])
 app.include_router(users.router, prefix="/users", tags=["users"])
 app.include_router(groups.router, prefix="/groups", tags=["groups"])
 
+from fastapi.middleware.cors import CORSMiddleware
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # restrict later
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 @app.on_event("startup")
 async def startup_event():
     print("=" * 50)

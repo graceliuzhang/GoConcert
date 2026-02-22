@@ -6,5 +6,8 @@ COPY package*.json ./
 RUN npm install
 
 COPY . .
+RUN npm run build
 
-CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0", "--port", "3000"]
+RUN npm install -g serve
+
+CMD serve -s dist -l $PORT

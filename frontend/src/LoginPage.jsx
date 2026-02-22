@@ -52,6 +52,18 @@ export default function LoginPage({ onAuthSuccess }) {
     return 'Authentication failed';
   };
 
+  const readJsonSafe = async (response) => {
+    try {
+      const contentType = response.headers.get('content-type') || '';
+      if (!contentType.toLowerCase().includes('application/json')) {
+        return null;
+      }
+      return await response.json();
+    } catch {
+      return null;
+    }
+  };
+
   const handleSubmit = async () => {
     setLoading(true);
     setError('');
@@ -61,12 +73,20 @@ export default function LoginPage({ onAuthSuccess }) {
         ? await login(email, password)
         : await register(email, password);
 
+      const payload = await readJsonSafe(response);
+
       if (!response.ok) {
-        const payload = await response.json().catch(() => ({}));
+        if (!payload) {
+          throw new Error('Authentication failed. Check VITE_API_URL and backend service URL.');
+        }
         throw new Error(parseApiError(payload, mode, response.status));
       }
 
-      const authPayload = await response.json();
+      if (!payload?.access_token) {
+        throw new Error('Login response was not valid JSON with an access token.');
+      }
+
+      const authPayload = payload;
       setToken(authPayload.access_token);
 
       const meResponse = await getMe();

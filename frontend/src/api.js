@@ -1,4 +1,21 @@
 const TOKEN_KEY = 'goconcert_token';
+export const API_URL = import.meta.env.VITE_API_URL;
+
+export function buildApiUrl(path) {
+  if (/^https?:\/\//.test(path)) {
+    return path;
+  }
+
+  const base = (API_URL || '').replace(/\/$/, '').replace(/\/api$/, '');
+  const normalizedPath = path.startsWith('/') ? path : `/${path}`;
+
+  if (!base) {
+    return normalizedPath;
+  }
+
+  const backendPath = normalizedPath.replace(/^\/api(?=\/|$)/, '');
+  return `${base}${backendPath}`;
+}
 
 export function getToken() {
   return localStorage.getItem(TOKEN_KEY) || '';
@@ -14,7 +31,7 @@ export function clearToken() {
 
 export async function authRequest(path, method = 'GET', body) {
   const token = getToken();
-  const response = await fetch(path, {
+  const response = await fetch(buildApiUrl(path), {
     method,
     headers: {
       'Content-Type': 'application/json',
@@ -27,7 +44,7 @@ export async function authRequest(path, method = 'GET', body) {
 }
 
 export async function login(email, password) {
-  const response = await fetch('/api/auth/login', {
+  const response = await fetch(buildApiUrl('/api/auth/login'), {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ email, password }),
@@ -36,7 +53,7 @@ export async function login(email, password) {
 }
 
 export async function register(email, password) {
-  const response = await fetch('/api/auth/register', {
+  const response = await fetch(buildApiUrl('/api/auth/register'), {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ email, password }),
