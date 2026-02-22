@@ -12,8 +12,8 @@ export default function ProfilePage({ goTo, currentUser, onSignOut }) {
         <div className="section-title">Profile</div>
         <div className="section-sub" style={{ marginBottom: 32 }}>Manage your account</div>
 
-        <div className="profile-grid">
-          <div className="card">
+        <div className="profile-grid" style={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
+          <div className="card" style={{ maxWidth: 900, width: '100%' }}>
             <h3 style={{ fontFamily: "'Playfair Display', serif", marginBottom: 20 }}>Account Info</h3>
             <div className="field">
               <label>Display Name</label>
