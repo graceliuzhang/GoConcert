@@ -110,9 +110,10 @@ export default function App() {
           goTo={goTo}
           event={selectedEvent}
           authToken={authToken}
+          refreshKey={refreshKey}
           onOpenCreateGroup={() => setModalOpen(true)}
         />
-      )}refreshKey={refreshKey}
+      )}
           
       {authToken && page === 'groups' && (
         <GroupsPage goTo={goTo} authToken={authToken} onOpenCreateGroup={() => setModalOpen(true)} />

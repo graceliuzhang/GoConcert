@@ -16,10 +16,6 @@ export default function ProfilePage({ goTo, currentUser, onSignOut }) {
           <div className="card" style={{ maxWidth: 900, width: '100%' }}>
             <h3 style={{ fontFamily: "'Playfair Display', serif", marginBottom: 20 }}>Account Info</h3>
             <div className="field">
-              <label>Display Name</label>
-              <div>{email.split('@')[0]}</div>
-            </div>
-            <div className="field">
               <label>Email</label>
               <div>{email}</div>
             </div>

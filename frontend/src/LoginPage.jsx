@@ -4,6 +4,7 @@ import { login, register, getMe, setToken } from './api.js';
 
 export default function LoginPage({ onAuthSuccess }) {
   const [email, setEmail] = useState('');
+  const [displayName, setDisplayName] = useState('');
   const [password, setPassword] = useState('');
   const [mode, setMode] = useState('login');
   const [loading, setLoading] = useState(false);
@@ -59,7 +60,7 @@ export default function LoginPage({ onAuthSuccess }) {
     try {
       const response = mode === 'login'
         ? await login(email, password)
-        : await register(email, password);
+        : await register(email, password, displayName);
 
       if (!response.ok) {
         const payload = await response.json().catch(() => ({}));
@@ -92,12 +93,27 @@ export default function LoginPage({ onAuthSuccess }) {
           <label>Email</label>
           <input type="text" placeholder="you@example.com" value={email} onChange={(e) => setEmail(e.target.value)} />
         </div>
+        {mode === 'register' && (
+          <div className="field">
+            <label>Display Name</label>
+            <input
+              type="text"
+              placeholder="Your name"
+              value={displayName}
+              onChange={(e) => setDisplayName(e.target.value)}
+            />
+          </div>
+        )}
         <div className="field">
           <label>Password</label>
           <input type="password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} />
         </div>
         {error && <div className="section-sub" style={{ marginBottom: 12 }}>{error}</div>}
-        <button className="btn btn-primary" onClick={handleSubmit} disabled={loading || !email || !password}>
+        <button
+          className="btn btn-primary"
+          onClick={handleSubmit}
+          disabled={loading || !email || !password || (mode === 'register' && !displayName)}
+        >
           {loading ? 'Please wait…' : mode === 'login' ? 'Sign In' : 'Create Account'}
         </button>
         <div className="login-footer">

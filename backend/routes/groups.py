@@ -8,6 +8,17 @@ from bson import ObjectId
 router = APIRouter()
 
 
+def normalize_user_id(value):
+    if isinstance(value, ObjectId):
+        return value
+    if isinstance(value, str):
+        try:
+            return ObjectId(value)
+        except Exception:
+            return value
+    return value
+
+
 # --------------------------------------------------
 # 1️⃣ Create a Group
 # --------------------------------------------------
@@ -22,13 +33,14 @@ async def create_group(
         print(f"📝 Creating group: {group.name} for event {group.event_id}")
         print(f"👤 Creator user ID type: {type(current_user['_id'])}, value: {current_user['_id']}")
         
+        creator_id = normalize_user_id(current_user["_id"])
         group_doc = {
             "event_id": group.event_id,
             "name": group.name,
             "description": group.description,
             "max_members": group.max_members,
-            "creator_id": current_user["_id"],
-            "member_ids": [current_user["_id"]],  # Creator is first member
+            "creator_id": creator_id,
+            "member_ids": [creator_id],  # Creator is first member
             "event_title": group.event_title,
             "event_venue": group.event_venue,
             "event_meta": group.event_meta,
@@ -101,9 +113,10 @@ async def join_group(
             raise HTTPException(status_code=404, detail="Group not found")
         
         member_ids = group.get("member_ids", [])
+        current_user_id = normalize_user_id(current_user["_id"])
         
         # Check if already a member
-        if current_user["_id"] in member_ids:
+        if current_user_id in member_ids:
             return {"message": "Already a member of this group"}
         
         # Check if group is full
@@ -113,7 +126,7 @@ async def join_group(
         # Add user to group
         await db.groups.update_one(
             {"_id": ObjectId(group_id)},
-            {"$push": {"member_ids": current_user["_id"]}}
+            {"$push": {"member_ids": current_user_id}}
         )
         
         return {"message": "Successfully joined group"}
@@ -141,14 +154,15 @@ async def leave_group(
             raise HTTPException(status_code=404, detail="Group not found")
         
         member_ids = group.get("member_ids", [])
+        current_user_id = normalize_user_id(current_user["_id"])
         
-        if current_user["_id"] not in member_ids:
+        if current_user_id not in member_ids:
             raise HTTPException(status_code=400, detail="Not a member of this group")
         
         # Remove user from group
         await db.groups.update_one(
             {"_id": ObjectId(group_id)},
-            {"$pull": {"member_ids": current_user["_id"]}}
+            {"$pull": {"member_ids": current_user_id}}
         )
         
         # If group is empty, delete it
@@ -200,3 +214,57 @@ async def get_my_groups(current_user=Depends(get_current_user)):
     except Exception as e:
         print(f"Error fetching user groups: {e}")
         raise HTTPException(status_code=500, detail="Failed to fetch groups")
+
+
+# --------------------------------------------------
+# 6️⃣ Get Group Members
+# --------------------------------------------------
+
+@router.get("/{group_id}/members")
+async def get_group_members(
+    group_id: str,
+    current_user=Depends(get_current_user)
+):
+    """Get member details for a group"""
+    try:
+        group = await db.groups.find_one({"_id": ObjectId(group_id)})
+        if not group:
+            raise HTTPException(status_code=404, detail="Group not found")
+
+        member_ids = group.get("member_ids", [])
+        if not member_ids:
+            return {"count": 0, "members": []}
+
+        object_ids = []
+        passthrough_ids = []
+        for member_id in member_ids:
+            normalized = normalize_user_id(member_id)
+            if isinstance(normalized, ObjectId):
+                object_ids.append(normalized)
+            else:
+                passthrough_ids.append(str(normalized))
+
+        users = []
+        if object_ids:
+            users = await db.users.find({"_id": {"$in": object_ids}}).to_list(200)
+
+        users_by_id = {str(user.get("_id")): user for user in users}
+        members = []
+        for member_id in member_ids:
+            normalized = normalize_user_id(member_id)
+            lookup_key = str(normalized)
+            user = users_by_id.get(lookup_key)
+            members.append(
+                {
+                    "id": lookup_key,
+                    "email": user.get("email") if user else None,
+                    "display_name": user.get("display_name") if user else None,
+                }
+            )
+
+        return {"count": len(members), "members": members}
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"Error fetching group members: {e}")
+        raise HTTPException(status_code=500, detail="Failed to fetch group members")
