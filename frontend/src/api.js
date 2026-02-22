@@ -1,12 +1,29 @@
 const TOKEN_KEY = 'goconcert_token';
 export const API_URL = import.meta.env.VITE_API_URL;
 
+function normalizeApiBase(rawApiUrl) {
+  const raw = (rawApiUrl || '').trim();
+  if (!raw) {
+    return '';
+  }
+
+  if (/^https?:\/\//i.test(raw)) {
+    return raw;
+  }
+
+  if (raw.startsWith('//')) {
+    return `https:${raw}`;
+  }
+
+  return `https://${raw}`;
+}
+
 export function buildApiUrl(path) {
   if (/^https?:\/\//.test(path)) {
     return path;
   }
 
-  const base = (API_URL || '').replace(/\/$/, '').replace(/\/api$/, '');
+  const base = normalizeApiBase(API_URL).replace(/\/$/, '').replace(/\/api$/, '');
   const normalizedPath = path.startsWith('/') ? path : `/${path}`;
 
   if (!base) {
