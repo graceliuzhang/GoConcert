@@ -67,7 +67,7 @@ nav {
   justify-content: space-between;
   padding: 18px 36px;
   border-bottom: 1px solid var(--border);
-  background: rgba(243,238,255,0.85);
+  background: rgba(255, 254, 255, 0.85);
   backdrop-filter: blur(12px);
   position: sticky;
   top: 0;
