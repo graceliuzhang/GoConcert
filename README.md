@@ -27,7 +27,10 @@ The GoConcert website is designed for concert enthusiasts who want to meet other
 
 
 ## Demo
-
+<img width="947" height="473" alt="thumbnail " src="https://github.com/user-attachments/assets/7a0578c9-b949-4fb2-9099-da8c780a0270" />
+Home Page
+<img width="947" height="475" alt="Screenshot 2026-02-22 104805" src="https://github.com/user-attachments/assets/ed1b3d44-b6fd-4be5-846c-bc16e2f07f81" />
+Event Page
 
 ## How to Run Locally?
 - Clone the repository locally.
