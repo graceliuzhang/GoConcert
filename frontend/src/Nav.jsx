@@ -10,7 +10,10 @@ const NAV_LINKS = [
 export default function Nav({ currentPage, goTo }) {
   return (
     <nav>
-      <div className="nav-logo">GoConcert</div>
+      <div className="nav-logo">
+        <img className="nav-logo-icon" src="/logo.png" alt="GoConcert" />
+        <span>GoConcert</span>
+      </div>
       <div className="nav-links">
         {NAV_LINKS.map(({ label, page }) => (
           <button

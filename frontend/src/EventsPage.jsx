@@ -78,7 +78,11 @@ export default function EventsPage({ goTo, onSelectEvent }) {
               onClick={() => onSelectEvent(ev)}
             >
               <div className="event-row-emoji" style={ev.emojiStyle || {}}>
-                {ev.emoji || '🎵'}
+                <img
+                  className="event-row-emoji-icon"
+                  src="/note.png"
+                  alt="Note"
+                />
               </div>
               <div className="event-row-info">
                 <div className="event-row-title">{ev.title}</div>
