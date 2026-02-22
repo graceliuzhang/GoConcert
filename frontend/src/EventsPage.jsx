@@ -5,12 +5,12 @@ import { buildApiUrl } from './api.js';
 
 export default function EventsPage({ goTo, onSelectEvent }) {
   const [search, setSearch] = useState('');
+  const [searchInput, setSearchInput] = useState('');
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
   useEffect(() => {
-    const timeoutId = setTimeout(() => {
     const fetchEvents = async () => {
       setLoading(true);
       setError('');
@@ -40,9 +40,6 @@ export default function EventsPage({ goTo, onSelectEvent }) {
     };
 
     fetchEvents();
-    }, 300);
-
-    return () => clearTimeout(timeoutId);
   }, [search]);
 
   return (
@@ -61,8 +58,13 @@ export default function EventsPage({ goTo, onSelectEvent }) {
           <input
             type="text"
             placeholder="Search artist or tour name"
-            value={search}
-            onChange={e => setSearch(e.target.value)}
+            value={searchInput}
+            onChange={e => setSearchInput(e.target.value)}
+            onKeyDown={e => {
+              if (e.key === 'Enter') {
+                setSearch(searchInput);
+              }
+            }}
           />
         </div>
 
