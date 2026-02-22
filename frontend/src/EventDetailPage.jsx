@@ -1,25 +1,54 @@
 // EventDetailPage.jsx
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Nav from './Nav.jsx';
 import { authRequest } from './api.js';
 
-export default function EventDetailPage({ goTo, event, onOpenCreateGroup }) {
+export default function EventDetailPage({ goTo, event, onOpenCreateGroup, refreshKey }) {
   const [saveState, setSaveState] = useState('');
   const [groups, setGroups] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const lastFetchTime = useRef(0);
 
+  // Load groups whenever event changes OR refreshKey changes
   useEffect(() => {
     if (event?.ticketmaster_id) {
       loadGroups();
     }
+  }, [event?.ticketmaster_id, refreshKey]);
+
+  // Auto-refresh groups every 10 seconds when on this page
+  useEffect(() => {
+    if (!event?.ticketmaster_id) return;
+
+    const interval = setInterval(() => {
+      loadGroups(true);
+    }, 10000); // Refresh every 10 seconds
+
+    return () => clearInterval(interval);
   }, [event?.ticketmaster_id]);
 
-  const loadGroups = async () => {
+  const loadGroups = async (forceRefresh = false) => {
+    // Prevent duplicate fetches within 1 second
+    const now = Date.now();
+    if (!forceRefresh && now - lastFetchTime.current < 1000) {
+      return;
+    }
+    lastFetchTime.current = now;
+
     setLoading(true);
     try {
-      const response = await fetch(`/api/groups/event/${event.ticketmaster_id}`);
+      // Add cache-busting parameter to force fresh data
+      const timestamp = new Date().getTime();
+      const response = await fetch(`/api/groups/event/${event.ticketmaster_id}?_t=${timestamp}`, {
+        cache: 'no-cache',
+        headers: {
+          'Cache-Control': 'no-cache'
+        }
+      });
       if (response.ok) {
         const data = await response.json();
+        console.log(`📊 Loaded ${data.groups?.length || 0} groups for event ${event.ticketmaster_id}`);
         setGroups(data.groups || []);
       }
     } catch (err) {
@@ -27,6 +56,12 @@ export default function EventDetailPage({ goTo, event, onOpenCreateGroup }) {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    await loadGroups(true);
+    setRefreshing(false);
   };
 
   if (!event) return null;
@@ -92,10 +127,17 @@ export default function EventDetailPage({ goTo, event, onOpenCreateGroup }) {
           </div>
         </div>
 
-        <div style={{ display: 'flex', gap: 16, marginBottom: 32, flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', gap: 16, marginBottom: 32, flexWrap: 'wrap', alignItems: 'center' }}>
           <button className="btn btn-primary" onClick={onOpenCreateGroup}>
             + Create Group
           </button>
+          <button className="btn btn-ghost" onClick={handleSaveEvent}>
+            Save Event
+          </button>
+          <button className="btn btn-ghost" onClick={handleRefresh} disabled={refreshing}>
+            {refreshing ? '🔄 Refreshing...' : '🔄 Refresh Groups'}
+          </button>
+          {saveState && <div className="section-sub" style={{ margin: 0 }}>{saveState}</div>}
         </div>
 
         <div>

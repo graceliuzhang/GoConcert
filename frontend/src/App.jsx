@@ -19,6 +19,7 @@ export default function App() {
   const [authToken, setAuthToken] = useState('');
   const [currentUser, setCurrentUser] = useState(null);
   const [authLoading, setAuthLoading] = useState(true);
+  const [refreshKey, setRefreshKey] = useState(0);
 
   useEffect(() => {
     const bootstrapAuth = async () => {
@@ -62,16 +63,14 @@ export default function App() {
 
   const handleSelectEvent = (ev) => {
     setSelectedEvent(ev);
+    setRefreshKey(prev => prev + 1); // Force refresh when navigating to event detail
     goTo('event-detail');
   };
 
   const handleCreateGroupConfirm = async () => {
     setModalOpen(false);
-    // Refresh the event detail page to show new group
-    if (page === 'event-detail' && selectedEvent) {
-      // Force re-render by updating selectedEvent
-      setSelectedEvent({...selectedEvent});
-    }
+    // Increment refreshKey to trigger data refresh in EventDetailPage
+    setRefreshKey(prev => prev + 1);
   };
 
   const handleAuthSuccess = (token, user) => {
@@ -113,7 +112,8 @@ export default function App() {
           authToken={authToken}
           onOpenCreateGroup={() => setModalOpen(true)}
         />
-      )}
+      )}refreshKey={refreshKey}
+          
       {authToken && page === 'groups' && (
         <GroupsPage goTo={goTo} authToken={authToken} onOpenCreateGroup={() => setModalOpen(true)} />
       )}
