@@ -21,18 +21,28 @@
 body {
   font-family: 'Inria Serif';
   background-color: var(--bg);
-  background-image: url('/background 2.jpg');
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  background-attachment: fixed;
   color: var(--text);
   min-height: 100vh;
   overflow-x: hidden;
+  position: relative;
 }
 
 /* Keep vertical scrollbar reserved to avoid layout width shifts */
 html { overflow-y: scroll; }
+
+/* Background image with opacity */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url('/background 2.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  opacity: 0.85;
+  pointer-events: none;
+  z-index: -1;
+}
 
 body::before {
   content: '';
