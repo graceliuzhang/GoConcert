@@ -19,6 +19,9 @@ async def create_group(
 ):
     """Create a new group for an event"""
     try:
+        print(f"📝 Creating group: {group.name} for event {group.event_id}")
+        print(f"👤 Creator user ID type: {type(current_user['_id'])}, value: {current_user['_id']}")
+        
         group_doc = {
             "event_id": group.event_id,
             "name": group.name,
@@ -33,14 +36,15 @@ async def create_group(
         }
         
         result = await db.groups.insert_one(group_doc)
+        print(f"✓ Group created successfully with ID: {result.inserted_id}")
         
         return {
             "message": "Group created successfully",
             "group_id": str(result.inserted_id)
         }
     except Exception as e:
-        print(f"Error creating group: {e}")
-        raise HTTPException(status_code=500, detail="Failed to create group")
+        print(f"✗ Error creating group: {type(e).__name__}: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to create group: {str(e)}")
 
 
 # --------------------------------------------------
@@ -51,7 +55,9 @@ async def create_group(
 async def get_event_groups(event_id: str):
     """Get all groups for a specific event"""
     try:
+        print(f"🔍 Fetching groups for event: {event_id}")
         groups = await db.groups.find({"event_id": event_id}).to_list(100)
+        print(f"📊 Found {len(groups)} groups for event {event_id}")
         
         result = []
         for group in groups:
@@ -73,7 +79,7 @@ async def get_event_groups(event_id: str):
         
         return {"count": len(result), "groups": result}
     except Exception as e:
-        print(f"Error fetching groups: {e}")
+        print(f"✗ Error fetching groups: {type(e).__name__}: {e}")
         raise HTTPException(status_code=500, detail="Failed to fetch groups")
 
 
