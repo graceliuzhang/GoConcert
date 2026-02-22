@@ -82,12 +82,17 @@ export default function LoginPage({ onAuthSuccess }) {
         throw new Error(parseApiError(payload, mode, response.status));
       }
 
-      if (!payload?.access_token) {
-        throw new Error('Login response was not valid JSON with an access token.');
+      const accessToken = payload?.access_token || payload?.token || payload?.data?.access_token;
+      if (!accessToken) {
+        const contentType = response.headers.get('content-type') || 'unknown content-type';
+        throw new Error(`Login response missing access token from ${response.url} (${contentType}). Check VITE_API_URL.`);
       }
 
-      const authPayload = payload;
-      setToken(authPayload.access_token);
+      const authPayload = {
+        ...(payload || {}),
+        access_token: accessToken,
+      };
+      setToken(accessToken);
 
       const meResponse = await getMe();
       if (!meResponse.ok) {
