@@ -24,6 +24,9 @@ body {
   overflow-x: hidden;
 }
 
+/* Keep vertical scrollbar reserved to avoid layout width shifts */
+html { overflow-y: scroll; }
+
 body::before {
   content: '';
   position: fixed;
@@ -107,9 +110,11 @@ nav {
 /* ── SHARED ── */
 .container {
   max-width: 1100px;
+  width: 100%;
   margin: 0 auto;
   padding: 40px 24px;
   flex: 1;
+  box-sizing: border-box;
 }
 
 .section-title {
@@ -309,6 +314,16 @@ nav {
 
 /* ── EVENTS ── */
 .event-list-view { display: flex; flex-direction: column; gap: 0; }
+
+/* Keep event list and search bar width stable to avoid reflow during loading/search */
+.event-list-view, .search-bar, .event-row, .search-bar input {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.search-bar input {
+  min-width: 320px;
+}
 
 .event-row {
   display: flex;
